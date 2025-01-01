@@ -3,7 +3,7 @@
         <template #content>
             <img :src="image" id="imageid" class="hidden"/>
             <div class="min-h-screen">
-                <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
                     <!-- Progress bar -->
                     <div class="bg-indigo-100 h-2">
                         <div
@@ -87,9 +87,9 @@
                             <!-- Step 2: Choose Specifications -->
                             <div v-if="currentStep === 2" class="space-y-6">
                                 <h2 class="text-2xl font-bold text-indigo-800">Choose Pattern Specifications</h2>
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="flex gap-4">
                                     <div>
-                                        <img v-show="!encodingImage" @load="encodingImage = false" :src="croppedImage"/>
+                                        <img v-show="!encodingImage" @load="encodingImage = false" :src="croppedImage" class="max-w-2x w-80"/>
                                         <div v-show="encodingImage" class="w-full flex items-center justify-center">
                                             <div class="text-center">
                                                 <Spinner :slice-width="100" :slice-height="100" :slice-depth="0.05"
@@ -100,7 +100,7 @@
                                         </div>
                                     </div>
 
-                                    <div>
+                                    <div class="w-full">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label for="width" class="block text-sm font-medium text-gray-700 mb-1">Width
@@ -108,6 +108,7 @@
                                                 <input
                                                     type="number"
                                                     id="width"
+                                                    @blur="saveAndLoadVariants"
                                                     v-model="patternWidth"
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                                                     min="10"
@@ -119,6 +120,7 @@
                                                        class="block text-sm font-medium text-gray-700 mb-1">Height
                                                     (stitches)</label>
                                                 <input
+                                                    @blur="saveAndLoadVariants"
                                                     type="number"
                                                     id="height"
                                                     v-model="patternHeight"
@@ -130,61 +132,68 @@
                                         </div>
                                         <div>
                                             <label for="colorCount"
-                                                   class="block text-sm font-medium text-gray-700 mb-1">Color Count
+                                                   class="block mt-4 text-sm font-medium text-gray-700 mb-1">Color Count
                                                 ({{ colorCount }} colors)</label>
                                             <input
+                                                @mouseup="saveAndLoadVariants"
                                                 type="range"
                                                 id="colorCount"
                                                 v-model="colorCount"
                                                 class="w-full"
                                                 min="2"
-                                                max="50"
+                                                max="100"
                                             />
                                             <div class="flex justify-between text-sm text-gray-500">
                                                 <span>2 colors</span>
                                                 <span class="font-bold">{{ colorCount }} colors</span>
-                                                <span>50 colors</span>
+                                                <span>100 colors</span>
+                                            </div>
+
+
+                                        </div>
+                                        <div v-if="!loadingVariants">
+                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div
+                                                    v-for="(variant, i) in variants"
+                                                    :key="i"
+                                                    class="brightness-150 border-2 rounded-lg p-2 cursor-pointer transition-all duration-300 hover:shadow-lg"
+                                                    :class="{ 'border-indigo-500 ring-2 ring-indigo-300': selectedVariant === i, 'border-gray-200 hover:border-indigo-300': selectedVariant !== i }"
+                                                    @click="() => {selectedVariant = i; chosenVariant = variant}"
+                                                >
+                                                    <img :src="'data:image/png;base64,'+variant.base64PngImage"
+                                                         :alt="`Pattern variant ${i}`" class="w-full h-auto"/>
+                                                </div>
+
+
+                                            </div>
+
+
+                                            <button
+                                                @click="getVariants"
+                                                class="px-4 py-2 bg-white text-indigo-600 rounded-md border border-indigo-600 hover:bg-indigo-50 transition-colors mt-4"
+
+                                            >
+                                                {{ variants.length > 0 ? 'Regenerate' : 'Generate Pattern' }}
+                                            </button>
+                                        </div>
+
+                                        <div v-else class="w-full flex items-center justify-center">
+                                            <div class="text-center">
+                                                <Spinner :slice-width="100" :slice-height="100" :slice-depth="0.05"
+                                                         :slices="200" style="width: 100px; height: 100px"
+                                                         :image-url="route('index')+'/img/mark.png'"/>
+                                                Loading Variants
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Step 3: Select Variant -->
-                            <div v-if="currentStep === 3" class="space-y-6">
-                                <h2 class="text-2xl font-bold text-indigo-800">Select Pattern Variant</h2>
-                                <p class="text-gray-600">Choose your favorite pattern from the options below:</p>
-                                <div v-if="!loadingVariants" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div
-                                        v-for="(variant, i) in variants"
-                                        :key="i"
-                                        class="border-2 rounded-lg p-2 cursor-pointer transition-all duration-300 hover:shadow-lg"
-                                        :class="{ 'border-indigo-500 ring-2 ring-indigo-300': selectedVariant === i, 'border-gray-200 hover:border-indigo-300': selectedVariant !== i }"
-                                        @click="selectedVariant = i"
-                                    >
-                                        <img :src="'data:image/png;base64,'+variant.base64PngImage"
-                                             :alt="`Pattern variant ${i}`" class="w-full h-auto"/>
-                                    </div>
+                        <!-- Step 3: Select Variant -->
+                        <div v-if="currentStep === 3" >
+                            <Refine v-if="chosenVariant" :variant="chosenVariant" :pattern="pattern"/>
 
-
-                                    <button
-                                        @click="getVariants"
-                                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-
-                                    >
-                                        Regenerate
-                                    </button>
-
-                                </div>
-                                <div v-else class="w-full flex items-center justify-center">
-                                    <div class="text-center">
-                                        <Spinner :slice-width="100" :slice-height="100" :slice-depth="0.05"
-                                                 :slices="200" style="width: 100px; height: 100px"
-                                                 :image-url="route('index')+'/img/mark.png'"/>
-                                        Loading Variants
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -193,14 +202,14 @@
                         <button
                             v-if="currentStep > 1"
                             @click="currentStep--"
-                            class="px-4 py-2 bg-white text-indigo-600 rounded-md border border-indigo-600 hover:bg-indigo-50 transition-colors"
+                            class="px-4 py-2 bg-white disabled:opacity-25 text-indigo-600 rounded-md border border-indigo-600 hover:bg-indigo-50 transition-colors"
                         >
                             Previous
                         </button>
                         <button
                             v-if="currentStep < 3"
                             @click="currentStep++"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                            class="px-4 py-2 disabled:opacity-25 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
                             :disabled="!canProceed"
                         >
                             Next
@@ -208,7 +217,7 @@
                         <button
                             v-if="currentStep === 3"
                             @click="finishWizard"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                            class="px-4 py-2 disabled:opacity-25 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
                             :disabled="!canProceed"
                         >
                             Create Pattern
@@ -229,6 +238,7 @@ import LandingLayout from "@/Layouts/LandingLayout.vue";
 import Spinner from "@/Components/Spinner.vue";
 import {router} from "@inertiajs/vue3";
 import {string} from "three/tsl";
+import Refine from "@/Pages/Wizard/Refine.vue";
 
 const props = defineProps({
     image: String,
@@ -237,7 +247,7 @@ const props = defineProps({
 
 const currentStep = ref(props.pattern ? 2 : 1)
 
-const stepTitles = ['Upload & Crop', 'Specifications', 'Select Variant']
+const stepTitles = ['Upload & Crop', 'Specifications', 'Refine']
 
 const fileInput = ref(null)
 const uploadedImage = ref(null)
@@ -252,9 +262,12 @@ const loadingImage = ref(false)
 const loadingVariants = ref(false)
 const encodingImage = ref(false)
 const variants = ref([])
+const chosenVariant = ref(null)
 
 const getVariants = () => {
     loadingVariants.value = true
+    chosenVariant.value = null
+    selectedVariant.value = null
     window.axios.get(route('pattern.variants', props.pattern.uuid)).then((res) => {
         loadingVariants.value = false
         variants.value = res.data
@@ -263,6 +276,7 @@ const getVariants = () => {
 
 onMounted(() => {
     if (props.pattern) {
+        getVariants()
         encodingImage.value = true
         croppedImage.value = route('pattern.original', props.pattern.uuid)
         uploadedImage.value = croppedImage.value
@@ -270,18 +284,28 @@ onMounted(() => {
     }
 })
 
-watch(currentStep, () => {
-    if (currentStep.value === 3) {
-        loadingVariants.value = true
-        window.axios.patch(route('pattern.update', props.pattern.uuid), {
-            color_count: colorCount.value,
-            width: patternWidth.value,
-            height: patternHeight.value
-        }).then(() => {
-            getVariants()
-        })
+const saveAndLoadVariants = () => {
+    loadingVariants.value = true
+    if (patternWidth.value > 500){
+        alert('Width and height cannot exceed 500 stitches')
+        patternWidth.value = 500;
     }
-    if (currentStep.value === 2) {
+    if (patternHeight.value > 500){
+        alert('Width and height cannot exceed 500 stitches')
+        patternHeight.value = 500;
+    }
+
+    window.axios.patch(route('pattern.update', props.pattern.uuid), {
+        color_count: colorCount.value,
+        width: patternWidth.value,
+        height: patternHeight.value
+    }).then(() => {
+        getVariants()
+    })
+}
+watch(currentStep, (current, previous) => {
+
+    if (current === 2 && previous === 1) {
         cropImage()
         if (!props.pattern) {
             loadingImage.value = true;
@@ -298,13 +322,29 @@ watch(currentStep, () => {
                     'content-type': 'multipart/form-data'
                 }
             }).then((res) => {
+                console.log('here')
                 if (res.data.pattern.uuid) {
                     router.visit(route('pattern.show', res.data.pattern.uuid))
                 }
             }).catch((err) => {
 
             })
+        } else {
+            loadingImage.value = true;
+            const formData = new FormData();
+            formData.append('image', croppedImage.value)
+            if (removeBg.value === true) {
+                formData.append("remove_background", true)
+            }
+            window.axios.patch(route('pattern.update', props.pattern.uuid), {
+                image: croppedImage.value,
+                remove_background: removeBg.value
+        }).finally(() => {
+
+                window.location.reload()
+            })
         }
+
 
     }
 
@@ -345,7 +385,9 @@ const resetImage = () => {
 
 const canProceed = computed(() => {
     if (currentStep.value === 1) return uploadedImage.value !== null
-    if (currentStep.value === 2) return patternWidth.value > 0 && patternHeight.value > 0
+    if (currentStep.value === 2) {
+        return patternWidth.value > 0 && patternHeight.value > 0 && chosenVariant.value !== null
+    }
     if (currentStep.value === 3) return selectedVariant.value !== null
     return false
 })

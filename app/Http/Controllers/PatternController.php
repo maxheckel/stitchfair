@@ -20,7 +20,7 @@ class PatternController extends Controller
 {
     public function wizard()
     {
-        return Inertia::render('PatternWizard');
+        return Inertia::render('Wizard/Index');
     }
 
     public function index()
@@ -80,10 +80,19 @@ class PatternController extends Controller
     public function update(Request $request, $uuid)
     {
         $pattern = Pattern::where('uuid', $uuid)->where('user_id', Auth::id())->firstOrFail();
-        $pattern->width = $request->get('width');
-        $pattern->height = $request->get('height');
-        $pattern->color_count = $request->get('color_count');
+        if ($request->has('width')){
+            $pattern->width = $request->get('width');
+            $pattern->height = $request->get('height');
+            $pattern->color_count = $request->get('color_count');
+        }
+        if ($request->has('image')){
+            Storage::delete($pattern->original_image_path);
+            $originalImagePath = $this->uploadBase64ImageToDisk($request->get('image'), $request->get('remove_background'));
+            $pattern->original_image_path = $originalImagePath;
+        }
+
         $pattern->save();
+        return $pattern;
     }
 
     public function store(Request $request)
@@ -108,7 +117,7 @@ class PatternController extends Controller
     public function show($uuid)
     {
         $pattern = Pattern::where('uuid', $uuid)->where('user_id', Auth::id())->firstOrFail();
-        return Inertia::render('PatternWizard', [
+        return Inertia::render('Wizard/Index', [
             'pattern' => $pattern,
             'image' => Storage::temporaryUrl(
                 $pattern->original_image_path,

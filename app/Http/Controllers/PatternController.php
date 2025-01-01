@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Mtownsend\RemoveBg\RemoveBg;
 
+
 class PatternController extends Controller
 {
     public function wizard()
@@ -29,6 +30,7 @@ class PatternController extends Controller
 
     public function variants($uuid)
     {
+        $STITCH_IMAGE_GEN_LINUX_BINARY = env('STITCH_BINARY');
         $pattern = Pattern::where('uuid', $uuid)->where('user_id', Auth::id())->firstOrFail();
         $originalImage = Storage::get($pattern->original_image_path);
         $tempFilePath = tempnam(sys_get_temp_dir(), 'laravel_');
@@ -39,29 +41,29 @@ class PatternController extends Controller
         $height = $pattern->height;
         $count = $pattern->color_count;
         $result = Concurrency::run([
-            function () use ($tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path('stitch-image-gen-linux') . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
+            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
             },
-            function () use ($tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path('stitch-image-gen-linux') . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
+            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
             },
-            function () use ($tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path('stitch-image-gen-linux') . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
+            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
             },
-            function () use ($tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path('stitch-image-gen-linux') . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
+            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
             },
-            function () use ($tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path('stitch-image-gen-linux') . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
+            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
             },
-            function () use ($tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path('stitch-image-gen-linux') . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
+            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
             },
-            function () use ($tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path('stitch-image-gen-linux') . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
+            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
             },
-            function () use ($tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path('stitch-image-gen-linux') . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
+            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=/var/www/html/database/threads.db')->output());
             },
         ]);
         return $result;

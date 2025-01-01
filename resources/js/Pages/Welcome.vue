@@ -1,37 +1,17 @@
-<script setup>
-
-import { UploadCloud, Grid, Download } from 'lucide-vue-next'
-import {ref} from "vue";
-import ApplicationMark from "@/Components/ApplicationMark.vue";
-const currentYear = ref(new Date().getFullYear())
-
-</script>
-
 <template>
-    <Head title="Welcome" />
-    <div class="min-h-screen bg-gradient-to-br from-indigo-200 to-pink-100 text-gray-800 font-sans">
-        <!-- Header -->
-        <header class="p-4 bg-white shadow-md">
-            <div class="container mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <ApplicationMark class="w-12"/> <h1 class="text-3xl font-bold text-indigo-600">StitchFair</h1>
-                </div>
 
-                <nav class="space-x-4">
-                    <a href="#" class="hover:text-indigo-600 transition-colors">About</a>
-                    <a href="#" class="hover:text-indigo-600 transition-colors">Contact</a>
-                </nav>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="container mx-auto px-4 py-12">
+    <Head>
+        <title>Cross Stitch Pattern Generator</title>
+        <meta name="description" content="Transform Images into Cross-Stitch Patterns">
+    </Head>
+    <LandingLayout>
+        <template #content>
             <!-- Hero Section -->
             <section class="text-center mb-16">
                 <h2 class="text-5xl font-bold mb-4 text-indigo-800">Transform Images into Cross-Stitch Patterns</h2>
                 <p class="text-xl mb-8 text-gray-600">Upload your photos and watch them become beautiful cross-stitch patterns in seconds.</p>
                 <a
-                    href="/upload"
+                    :href="route('pattern.wizard')"
                     class="inline-block px-8 py-4 bg-indigo-600 text-white rounded-full text-xl font-semibold hover:bg-indigo-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                     Start Your Pattern
@@ -82,24 +62,19 @@ const currentYear = ref(new Date().getFullYear())
                 <h2 class="text-4xl font-bold mb-4 text-indigo-800">Ready to Stitch Your Memories?</h2>
                 <p class="text-xl mb-8 text-gray-600">Join thousands of crafters who have already turned their photos into beautiful cross-stitch art.</p>
                 <a
-                    href="/upload"
+                    :href="route('pattern.wizard')"
                     class="inline-block px-8 py-4 bg-indigo-600 text-white rounded-full text-xl font-semibold hover:bg-indigo-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                     Create Your Pattern Now
                 </a>
             </section>
-        </main>
+        </template>
+    </LandingLayout>
 
-        <!-- Footer -->
-        <footer class="bg-indigo-900 text-white py-8 mt-16">
-            <div class="container mx-auto text-center">
-                <p>&copy; {{ currentYear }} StitchFair. All rights reserved.</p>
-                <div class="mt-4 space-x-4">
-                    <a href="#" class="hover:text-indigo-300 transition-colors">Privacy Policy</a>
-                    <a href="#" class="hover:text-indigo-300 transition-colors">Terms of Service</a>
-                    <a href="#" class="hover:text-indigo-300 transition-colors">FAQ</a>
-                </div>
-            </div>
-        </footer>
-    </div>
+
 </template>
+<script setup>
+import {Download, Grid, UploadCloud} from "lucide-vue-next";
+import LandingLayout from "@/Layouts/LandingLayout.vue";
+import {Head} from "@inertiajs/vue3";
+</script>

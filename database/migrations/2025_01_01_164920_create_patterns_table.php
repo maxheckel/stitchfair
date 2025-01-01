@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('patterns', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->uuid()->default(DB::raw('(UUID())'));
+            $table->uuid()->default(DB::raw('(gen_random_uuid())'));
             $table->foreignIdFor(\App\Models\User::class)->nullable();
             $table->json('pixels')->nullable();
             $table->integer('width')->nullable();

@@ -87,8 +87,8 @@
                             <!-- Step 2: Choose Specifications -->
                             <div v-if="currentStep === 2" class="space-y-6">
                                 <h2 class="text-2xl font-bold text-indigo-800">Choose Pattern Specifications</h2>
-                                <div class="flex gap-4">
-                                    <div>
+                                <div class="md:flex  gap-4">
+                                    <div class="flex items-center justify-center md:block">
                                         <img v-show="!encodingImage" @load="encodingImage = false" :src="croppedImage" class="max-w-2x w-80"/>
                                         <div v-show="encodingImage" class="w-full flex items-center justify-center">
                                             <div class="text-center">
@@ -140,7 +140,7 @@
                                                 id="colorCount"
                                                 v-model="colorCount"
                                                 class="w-full"
-                                                min="2"
+                                                min="3"
                                                 max="100"
                                             />
                                             <div class="flex justify-between text-sm text-gray-500">

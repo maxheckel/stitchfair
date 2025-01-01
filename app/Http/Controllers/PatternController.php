@@ -40,31 +40,19 @@ class PatternController extends Controller
         $width = $pattern->width;
         $height = $pattern->height;
         $count = $pattern->color_count;
+
+        $gnerator = function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
+            return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path=' . base_path('database/threads.db'))->output());
+        };
         $result = Concurrency::run([
-            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path='.base_path('database/threads.db'))->output());
-            },
-            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path='.base_path('database/threads.db'))->output());
-            },
-            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path='.base_path('database/threads.db'))->output());
-            },
-            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path='.base_path('database/threads.db'))->output());
-            },
-            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path='.base_path('database/threads.db'))->output());
-            },
-            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path='.base_path('database/threads.db'))->output());
-            },
-            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path='.base_path('database/threads.db'))->output());
-            },
-            function () use ($STITCH_IMAGE_GEN_LINUX_BINARY, $tempFilePath, $width, $height, $count) {
-                return json_decode(Process::path(__DIR__)->run(base_path($STITCH_IMAGE_GEN_LINUX_BINARY) . ' --image_path=' . $tempFilePath . ' --width=' . $width . ' --height=' . $height . '  --count=' . $count . ' --thread_db_path='.base_path('database/threads.db'))->output());
-            },
+            $gnerator,
+            $gnerator,
+            $gnerator,
+            $gnerator,
+            $gnerator,
+            $gnerator,
+            $gnerator,
+            $gnerator,
         ]);
         return $result;
     }

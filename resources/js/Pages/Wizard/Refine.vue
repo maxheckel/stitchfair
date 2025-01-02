@@ -41,7 +41,7 @@
                 <div class="w-full">
                     Choose Color Replacement
                     <div class="w-full grid grid-cols-8 gap-4 mt-2">
-                        <template v-for="color in variant.palette">
+                        <template v-for="color in variant.palette.filter(val => val)">
                         <div  class="group text-center" v-if="color !== replacingColor">
                             <div  :class="{'border-indigo-600 border-2 shadow-md': color === withColor}" @click="withColor = color" class="border border-gray-300 w-10 cursor-pointer h-10 rounded-md flex items-center justify-center" :style="{backgroundColor: color}">
 
@@ -66,10 +66,10 @@
         </div>
     </Modal>
     <div class="grid grid-cols-10 ">
-        <div id="scrollable" class="col-span-8 overflow-scroll py-16"  style="max-height: calc(100vh - 250px)">
+        <div id="scrollable" :class="{'grabbable': currentTool === 'pan'}" class="col-span-8 overflow-scroll py-16"  style="max-height: calc(100vh - 250px)">
             <div :style="{height: zoomLevel*2+'px', width: pattern.width*zoomLevel*2+'px'}" v-for="y in pattern.height" class="mx-auto">
                 <template v-for="x in pattern.width">
-                    <Pixel @mouseover="handleMouseOver(x, y, $event)" @dragstart="setColor(x,y)" @click="setColor(x, y)" :zoom="zoomLevel" :background-color="variant.pixels[x+','+y]"/>
+                    <Pixel :grid-color="gridColor" @mouseover="handleMouseOver(x, y, $event)" @dragstart="setColor(x,y)" @click="setColor(x, y)" :zoom="zoomLevel" :background-color="variant.pixels[x+','+y]"/>
                 </template>
             </div>
 
@@ -97,17 +97,21 @@
             <div class="px-8 ">
                 <div class="my-4">
                     Tools
-                    <div class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'eyedropper'">
-                        <Pipette/>
+                    <div class="grid grid-cols-6">
+                        <div :class="{'border border-indigo-600': currentTool === 'eyedropper'}" class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'eyedropper'">
+                            <Pipette/>
+                        </div>
+                        <div :class="{'border border-indigo-600': currentTool === 'pan'}" class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'pan'">
+                            <Hand/>
+                        </div>
+
                     </div>
-                    <div class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'pan'">
-                        <Hand/>
-                    </div>
+
                 </div>
 
                 Palette
                 <div class="grid grid-cols-6 gap-4">
-                    <div v-for="color in variant.palette" class="group text-center">
+                    <div v-for="color in variant.palette.filter(val => val)" class="group text-center">
                         <div @click="() => {currentColor = color; currentTool = 'brush'}" :class="{'border-indigo-600 border-2': currentColor === color}" class="border border-gray-300 w-10 cursor-pointer h-10 rounded-md flex items-center justify-center" :style="{backgroundColor: color}">
                             <Brush :class="{'!block': currentColor === color}" class="hidden group-hover:block" style="mix-blend-mode: difference; color: white;" />
                         </div>
@@ -122,6 +126,12 @@
                         +
                     </div>
                 </div>
+
+                <div class="mt-4">
+                    Grid Color
+                    <input class="block" v-model="gridColor" type="color"/>
+                </div>
+
             </div>
 
         </div>
@@ -130,7 +140,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import Pixel from "@/Pages/Wizard/Pixel.vue";
 import {ZoomIn, ZoomOut, Hand, Pipette, Brush} from "lucide-vue-next";
 import Modal from "@/Components/Modal.vue";
@@ -141,14 +151,15 @@ const props = defineProps({
     threads: Array
 })
 
+
 const currentColor = ref()
 const currentTool = ref('brush')
-const zoomLevel = ref(10)
+const zoomLevel = ref(5)
 const replacingColor = ref()
 const withColor = ref()
 const showingAddToPalette = ref(false)
 let saveTimeout = null
-
+const gridColor = ref('#5c5c5c')
 
 const setColor = (x, y) => {
     if (currentTool.value === 'pan'){
@@ -162,6 +173,9 @@ const setColor = (x, y) => {
         currentColor.value = props.variant.pixels[x+','+y]
         currentTool.value = 'brush'
         return
+    }
+    if (!currentColor.value){
+        return;
     }
     props.variant.pixels[x+','+y]=currentColor.value
     if (saveTimeout !== null){
@@ -230,9 +244,17 @@ const handleReplace = () =>{
     withColor.value = null
 }
 
+
+
 const handleMouseOver = (x, y, e) => {
     if (e.buttons === 1 || e.buttons === 3){
         setColor(x, y)
     }
 }
 </script>
+
+<style>
+.grabbable *{
+    cursor: grab;
+}
+</style>

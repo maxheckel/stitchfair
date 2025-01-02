@@ -147,6 +147,7 @@ const handleReplace = () =>{
             props.variant.pixels[pixel] = withColor.value
         }
     }
+
     props.variant.palette = props.variant.palette.filter(color => color !== replacingColor.value)
     window.axios.patch(route('pattern.update', props.pattern.uuid), {
         pixels: props.variant

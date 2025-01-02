@@ -3,9 +3,9 @@
         <template #content>
             <img :src="image" id="imageid" class="hidden"/>
             <div class="min-h-screen">
-                <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class=" bg-white  shadow-lg overflow-hidden">
                     <!-- Progress bar -->
-                    <div class="bg-indigo-100 h-2">
+                    <div class="bg-indigo-100 h-1">
                         <div
                             class="bg-indigo-600 h-full transition-all duration-500 ease-in-out"
                             :style="{ width: `${((currentStep - 1) / 2) * 100}%` }"
@@ -31,7 +31,7 @@
                     </div>
 
                     <!-- Step content -->
-                    <div class="p-8">
+                    <div class="px-8">
                         <div v-if="loadingImage" class="flex-row justify-center text-center">
                             <Spinner :slice-width="100" :slice-height="100" :slice-depth="0.05" :slices="200"
                                      style="width: 100px; height: 100px" :image-url="route('index')+'/img/mark.png'"/>
@@ -41,7 +41,7 @@
                         <div v-else>
                             <!-- Step 1: Upload and Crop -->
                             <div v-if="currentStep === 1" class="space-y-6">
-                                <h2 class="text-2xl font-bold text-indigo-800">Upload and Crop Your Image</h2>
+                                <h2 class="text-2xl mt-8 font-bold text-indigo-800">Upload and Crop Your Image</h2>
                                 <div
                                     v-if="!uploadedImage"
                                     class="border-2 border-dashed border-indigo-300 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-500 transition-colors"
@@ -59,8 +59,9 @@
                                     @change="handleFileUpload"
                                 />
 
-                                <div v-if="uploadedImage" class="mt-6">
+                                <div v-if="uploadedImage" class="mt-6 ">
                                     <Cropper
+                                        style="min-height: calc(100vh - 400px)"
                                         class="cropper"
                                         :src="uploadedImage"
                                         :stencil-props="{
@@ -68,17 +69,17 @@
                                       }"
                                         @change="onChange"
                                     />
-                                    <div class="mt-4 flex justify-end space-x-4">
+                                    <div class="mt-4 flex justify-start space-x-4">
 
-                                        <label class="flex items-center gap-2">
-                                            <input v-model="removeBg" type="checkbox"> Automatically remove background
-                                        </label>
                                         <button
                                             @click="resetImage"
                                             class="px-4 py-2 bg-white text-indigo-600 rounded-md border border-indigo-600 hover:bg-indigo-50 transition-colors"
                                         >
                                             Reset
                                         </button>
+                                        <label class="flex items-center gap-2">
+                                            <input v-model="removeBg" type="checkbox"> Automatically remove background
+                                        </label>
                                     </div>
                                 </div>
 
@@ -86,7 +87,7 @@
 
                             <!-- Step 2: Choose Specifications -->
                             <div v-if="currentStep === 2" class="space-y-6">
-                                <h2 class="text-2xl font-bold text-indigo-800">Choose Pattern Specifications</h2>
+                                <h2 class="text-2xl font-bold text-indigo-800 mt-8">Choose Pattern Specifications</h2>
                                 <div class="md:flex  gap-4">
                                     <div class="flex items-center justify-center md:block">
                                         <img v-show="!encodingImage" @load="encodingImage = false" :src="croppedImage" class="max-w-2x w-80"/>
@@ -192,7 +193,7 @@
 
                         <!-- Step 3: Select Variant -->
                         <div v-if="currentStep === 3" >
-                            <Refine v-if="chosenVariant" :variant="chosenVariant" :pattern="pattern"/>
+                            <Refine :threads="threads" v-if="chosenVariant" :variant="chosenVariant" :pattern="pattern"/>
 
                         </div>
                     </div>
@@ -210,6 +211,7 @@
                             v-if="currentStep < 3"
                             @click="currentStep++"
                             class="px-4 py-2 disabled:opacity-25 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                            :class="{'ml-auto': currentStep === 1}"
                             :disabled="!canProceed"
                         >
                             Next
@@ -242,7 +244,8 @@ import Refine from "@/Pages/Wizard/Refine.vue";
 
 const props = defineProps({
     image: String,
-    pattern: Object
+    pattern: Object,
+    threads: Array
 })
 
 const currentStep = ref(props.pattern ? props.pattern.pixels ? 3 : 2 : 1)

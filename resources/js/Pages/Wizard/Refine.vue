@@ -1,4 +1,24 @@
 <template>
+
+    <Modal :show="showingAddToPalette">
+        <div class="bg-white max-w-7xl p-4 relative">
+
+            <div class="w-full grid grid-cols-8 gap-4 mt-2">
+                <template v-for="thread in threads.sort((a, b) => a.hue_order - b.hue_order)">
+                    <div  class="group text-center">
+                        <div  :class="{'border-indigo-600 border-2 shadow-md': thread.hex === withColor}" @click="withColor = thread.hex" class="border border-gray-300 w-10 cursor-pointer h-10 rounded-md flex items-center justify-center" :style="{backgroundColor: thread.hex}">
+
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="fixed top-0 ">
+            awoghuueo
+        </div>
+    </Modal>
+
     <Modal :show="replacingColor != null">
         <div class="bg-white max-w-7xl p-4">
 
@@ -45,9 +65,8 @@
 
         </div>
     </Modal>
-    <h2 class="text-2xl font-bold text-indigo-800">Refine</h2>
-    <div class="grid grid-cols-2">
-        <div class="overflow-scroll py-16" :style="{maxHeight: pattern.height*4+'px'}">
+    <div class="grid grid-cols-10 ">
+        <div id="scrollable" class="col-span-8 overflow-scroll py-16"  style="max-height: calc(100vh - 250px)">
             <div :style="{height: zoomLevel*2+'px', width: pattern.width*zoomLevel*2+'px'}" v-for="y in pattern.height" class="mx-auto">
                 <template v-for="x in pattern.width">
                     <Pixel @mouseover="handleMouseOver(x, y, $event)" @dragstart="setColor(x,y)" @click="setColor(x, y)" :zoom="zoomLevel" :background-color="variant.pixels[x+','+y]"/>
@@ -56,43 +75,51 @@
 
         </div>
 
-        <div class="relative">
+        <div class="relative col-span-2">
             <div class="absolute top-0 left-0 -ml-16">
-                <div class="p-2 rounded-md cursor-pointer bg-black bg-opacity-10 mb-1" @click="zoomLevel++">
+                <div class="p-2 rounded-md border border-gray-300 cursor-pointer bg-white  mb-1" @click="zoomLevel++">
                     <ZoomIn/>
                 </div>
-                <div class="p-2 rounded-md cursor-pointer bg-black bg-opacity-10" @click="zoomLevel > 1 ? zoomLevel-- : null">
+                <div class="p-2 mb-1 rounded-md border border-gray-300 cursor-pointer bg-white " @click="zoomLevel > 1 ? zoomLevel-- : null">
                     <ZoomOut/>
                 </div>
 
-                <div class="text-xs">
-                    Brush
-                </div>
-                <div class="p-2 rounded-md w-10 h-10 border border-gray-300 flex items-center justify-center" :style="{backgroundColor: currentColor !== 'clear' && currentColor !== 'eyedropper' ? currentColor : 'transparent'}">
-                    <Pipette v-if="currentColor === 'eyedropper'"/>
-                    <span v-else-if="currentColor === 'clear'" class="items-center text-2xl text-red-600" style="font-family: Arial, SansSerif">
+                <div class="p-2 rounded-md bg-white w-10 h-10 border border-gray-300 flex items-center justify-center" :style="{backgroundColor: currentTool === 'brush' ? currentColor : 'white'}">
+                    <Pipette v-if="currentTool === 'eyedropper'"/>
+                    <span v-else-if="currentTool === 'clear'" class="items-center text-2xl text-red-600" style="font-family: Arial, SansSerif">
                         x
                     </span>
+                    <Hand v-else-if="currentTool === 'pan'"/>
                     <Brush style="mix-blend-mode: difference; color: white;" v-else/>
                 </div>
             </div>
 
             <div class="px-8 ">
-                Click color to change stitches
-                <div class="grid grid-cols-10 gap-4">
+                <div class="my-4">
+                    Tools
+                    <div class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'eyedropper'">
+                        <Pipette/>
+                    </div>
+                    <div class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'pan'">
+                        <Hand/>
+                    </div>
+                </div>
+
+                Palette
+                <div class="grid grid-cols-6 gap-4">
                     <div v-for="color in variant.palette" class="group text-center">
-                        <div @click="currentColor = color" :class="{'border-indigo-600 border-2': currentColor === color}" class="border border-gray-300 w-10 cursor-pointer h-10 rounded-md flex items-center justify-center" :style="{backgroundColor: color}">
+                        <div @click="() => {currentColor = color; currentTool = 'brush'}" :class="{'border-indigo-600 border-2': currentColor === color}" class="border border-gray-300 w-10 cursor-pointer h-10 rounded-md flex items-center justify-center" :style="{backgroundColor: color}">
                             <Brush :class="{'!block': currentColor === color}" class="hidden group-hover:block" style="mix-blend-mode: difference; color: white;" />
                         </div>
                         <div @click="replacingColor = color" class="underline cursor-pointer text-indigo-600 hidden text-xs group-hover:block">
                             swap
                         </div>
                     </div>
-                    <div class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center text-2xl text-red-600 rounded-md" style="font-family: Arial, SansSerif" @click="currentColor = 'clear'">
+                    <div class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center text-2xl text-red-600 rounded-md" style="font-family: Arial, SansSerif" @click="currentTool = 'clear'">
                         x
                     </div>
-                    <div class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentColor = 'eyedropper'">
-                        <Pipette/>
+                    <div class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center text-2xl text-indigo-600 rounded-md" style="font-family: Arial, SansSerif" @click="showingAddToPalette = true">
+                        +
                     </div>
                 </div>
             </div>
@@ -105,26 +132,36 @@
 <script setup>
 import {computed, onMounted, ref} from "vue";
 import Pixel from "@/Pages/Wizard/Pixel.vue";
-import {ZoomIn, ZoomOut, Pipette, Brush} from "lucide-vue-next";
+import {ZoomIn, ZoomOut, Hand, Pipette, Brush} from "lucide-vue-next";
 import Modal from "@/Components/Modal.vue";
 
 const props = defineProps({
     variant: Object,
-    pattern: Object
+    pattern: Object,
+    threads: Array
 })
+
 const currentColor = ref()
-const zoomLevel = ref(2)
+const currentTool = ref('brush')
+const zoomLevel = ref(10)
 const replacingColor = ref()
 const withColor = ref()
+const showingAddToPalette = ref(false)
 let saveTimeout = null
 
+
 const setColor = (x, y) => {
-    if (currentColor.value === 'clear'){
+    if (currentTool.value === 'pan'){
+        return;
+    }
+    if (currentTool.value === 'clear'){
         props.variant.pixels[x+','+y]=null
         return
     }
-    if (currentColor.value === 'eyedropper'){
+    if (currentTool.value === 'eyedropper'){
         currentColor.value = props.variant.pixels[x+','+y]
+        currentTool.value = 'brush'
+        return
     }
     props.variant.pixels[x+','+y]=currentColor.value
     if (saveTimeout !== null){
@@ -137,6 +174,43 @@ const setColor = (x, y) => {
     }, 3000)
 }
 
+setTimeout(() => {
+    const scrollableDiv = document.getElementById('scrollable');
+
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
+
+    scrollableDiv.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        scrollableDiv.classList.add('dragging');
+        startX = e.pageX - scrollableDiv.offsetLeft;
+        startY = e.pageY - scrollableDiv.offsetTop;
+        scrollLeft = scrollableDiv.scrollLeft;
+        scrollTop = scrollableDiv.scrollTop;
+        e.preventDefault();
+    });
+
+    scrollableDiv.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const x = e.pageX - scrollableDiv.offsetLeft;
+        const y = e.pageY - scrollableDiv.offsetTop;
+        const walkX = (x - startX) * 2; // Adjust for sensitivity
+        const walkY = (y - startY) * 2;
+        scrollableDiv.scrollLeft = scrollLeft - walkX;
+        scrollableDiv.scrollTop = scrollTop - walkY;
+    });
+
+    scrollableDiv.addEventListener('mouseup', () => {
+        isDragging = false;
+        scrollableDiv.classList.remove('dragging');
+    });
+
+    scrollableDiv.addEventListener('mouseleave', () => {
+        isDragging = false;
+        scrollableDiv.classList.remove('dragging');
+    });
+
+}, 1000)
 const handleReplace = () =>{
     if (!withColor.value){
         alert('You must select a replacement color')

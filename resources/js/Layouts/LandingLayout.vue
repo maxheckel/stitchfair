@@ -27,7 +27,7 @@ defineProps({
         </header>
 
         <!-- Main Content -->
-        <main class="container mx-auto px-4 py-12">
+        <main >
             <slot name="content"/>
         </main>
 

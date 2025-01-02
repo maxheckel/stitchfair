@@ -118,12 +118,14 @@ class PatternController extends Controller
     public function show($uuid)
     {
         $pattern = Pattern::where('uuid', $uuid)->where('user_id', Auth::id())->firstOrFail();
+
         return Inertia::render('Wizard/Index', [
             'pattern' => $pattern,
             'image' => Storage::temporaryUrl(
                 $pattern->original_image_path,
                 now()->addMinutes(5)
-            )
+            ),
+            'threads' => DB::connection('threads')->select('select * from threads')
         ]);
     }
 

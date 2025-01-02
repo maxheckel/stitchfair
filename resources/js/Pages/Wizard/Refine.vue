@@ -84,12 +84,13 @@
                     <ZoomOut/>
                 </div>
 
-                <div class="p-2 rounded-md bg-white w-10 h-10 border border-gray-300 flex items-center justify-center" :style="{backgroundColor: currentTool === 'brush' ? currentColor : 'white'}">
+                <div class="p-2 rounded-md bg-white w-10 h-10 border border-gray-300 flex items-center justify-center" :style="{backgroundColor: currentTool === 'brush' || currentTool === 'fill' ? currentColor : 'white'}">
                     <Pipette v-if="currentTool === 'eyedropper'"/>
                     <span v-else-if="currentTool === 'clear'" class="items-center text-2xl text-red-600" style="font-family: Arial, SansSerif">
                         x
                     </span>
                     <Hand v-else-if="currentTool === 'pan'"/>
+                    <PaintBucket v-else-if="currentTool === 'fill'" style="mix-blend-mode: difference; color: white;"/>
                     <Brush style="mix-blend-mode: difference; color: white;" v-else/>
                 </div>
             </div>
@@ -98,11 +99,18 @@
                 <div class="my-4">
                     Tools
                     <div class="grid grid-cols-6">
+                        <div :class="{'border border-indigo-600': currentTool === 'brush'}" class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'brush'">
+                            <Brush/>
+                        </div>
                         <div :class="{'border border-indigo-600': currentTool === 'eyedropper'}" class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'eyedropper'">
                             <Pipette/>
                         </div>
                         <div :class="{'border border-indigo-600': currentTool === 'pan'}" class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'pan'">
                             <Hand/>
+                        </div>
+
+                        <div :class="{'border border-indigo-600': currentTool === 'fill'}" class="w-10 cursor-pointer h-10 flex justify-center border border-gray-300 items-center rounded-md" @click="currentTool = 'fill'">
+                            <PaintBucket/>
                         </div>
 
                     </div>
@@ -112,8 +120,7 @@
                 Palette
                 <div class="grid grid-cols-6 gap-4">
                     <div v-for="color in variant.palette.filter(val => val)" class="group text-center">
-                        <div @click="() => {currentColor = color; currentTool = 'brush'}" :class="{'border-indigo-600 border-2': currentColor === color}" class="border border-gray-300 w-10 cursor-pointer h-10 rounded-md flex items-center justify-center" :style="{backgroundColor: color}">
-                            <Brush :class="{'!block': currentColor === color}" class="hidden group-hover:block" style="mix-blend-mode: difference; color: white;" />
+                        <div @click="() => {currentColor = color}" :class="{'border-indigo-600 border-2': currentColor === color}" class="border border-gray-300 w-10 cursor-pointer h-10 rounded-md flex items-center justify-center" :style="{backgroundColor: color}">
                         </div>
                         <div @click="replacingColor = color" class="underline cursor-pointer text-indigo-600 hidden text-xs group-hover:block">
                             swap
@@ -142,7 +149,7 @@
 <script setup>
 import {computed, onMounted, ref, watch} from "vue";
 import Pixel from "@/Pages/Wizard/Pixel.vue";
-import {ZoomIn, ZoomOut, Hand, Pipette, Brush} from "lucide-vue-next";
+import {ZoomIn, ZoomOut, Hand, Pipette, Brush, PaintBucket} from "lucide-vue-next";
 import Modal from "@/Components/Modal.vue";
 
 const props = defineProps({
@@ -162,6 +169,9 @@ let saveTimeout = null
 const gridColor = ref('#5c5c5c')
 
 const setColor = (x, y) => {
+    if (currentTool.value === 'fill'){
+        fill(x, y, currentColor.value)
+    }
     if (currentTool.value === 'pan'){
         return;
     }
@@ -249,6 +259,32 @@ const handleReplace = () =>{
 const handleMouseOver = (x, y, e) => {
     if (e.buttons === 1 || e.buttons === 3){
         setColor(x, y)
+    }
+}
+
+const fill = (startX, startY, targetColor) => {
+    const startColor = props.variant.pixels[`${startX},${startY}`];
+    if (!startColor || startColor === targetColor) {
+        // If the starting color is undefined or already the target color, do nothing
+        return;
+    }
+
+    const queue = [[startX, startY]]; // Initialize queue with the starting point
+
+    while (queue.length > 0) {
+        const [x, y] = queue.shift(); // Get the next coordinate from the queue
+        const key = `${x},${y}`;
+
+        if (props.variant.pixels[key] === startColor) {
+            // Change the color
+            props.variant.pixels[key] = targetColor;
+
+            // Check adjacent cells (4-connected grid)
+            queue.push([x + 1, y]);
+            queue.push([x - 1, y]);
+            queue.push([x, y + 1]);
+            queue.push([x, y - 1]);
+        }
     }
 }
 </script>

@@ -65,6 +65,14 @@ class PatternController extends Controller
         echo Storage::get($pattern->original_image_path);
     }
 
+    public function update_pixel(Request $request, $uuid){
+        $pattern = Pattern::where('uuid', $uuid)->where('user_id', Auth::id())->firstOrFail();
+        $pixels = json_decode($pattern->pixels);
+        $pixels['pixels'][$request->get('coords')] = $request->get('color');
+        $pattern->pixels = json_encode($pixels);
+        $pattern->save();
+    }
+
     public function update(Request $request, $uuid)
     {
         $pattern = Pattern::where('uuid', $uuid)->where('user_id', Auth::id())->firstOrFail();
@@ -72,11 +80,16 @@ class PatternController extends Controller
             $pattern->width = $request->get('width');
             $pattern->height = $request->get('height');
             $pattern->color_count = $request->get('color_count');
+            $pattern->pixels = null;
         }
         if ($request->has('image')){
             Storage::delete($pattern->original_image_path);
             $originalImagePath = $this->uploadBase64ImageToDisk($request->get('image'), $request->get('remove_background'));
             $pattern->original_image_path = $originalImagePath;
+        }
+
+        if ($request->has('pixels')){
+            $pattern->pixels = json_encode($request->get('pixels'));
         }
 
         $pattern->save();

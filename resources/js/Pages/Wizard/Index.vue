@@ -245,7 +245,7 @@ const props = defineProps({
     pattern: Object
 })
 
-const currentStep = ref(props.pattern ? 2 : 1)
+const currentStep = ref(props.pattern ? props.pattern.pixels ? 3 : 2 : 1)
 
 const stepTitles = ['Upload & Crop', 'Specifications', 'Refine']
 
@@ -262,7 +262,7 @@ const loadingImage = ref(false)
 const loadingVariants = ref(false)
 const encodingImage = ref(false)
 const variants = ref([])
-const chosenVariant = ref(null)
+const chosenVariant = ref()
 
 const getVariants = () => {
     loadingVariants.value = true
@@ -280,7 +280,9 @@ onMounted(() => {
         encodingImage.value = true
         croppedImage.value = route('pattern.original', props.pattern.uuid)
         uploadedImage.value = croppedImage.value
-
+        if (props.pattern.pixels){
+            chosenVariant.value = JSON.parse(props.pattern.pixels)
+        }
     }
 })
 
@@ -305,6 +307,16 @@ const saveAndLoadVariants = () => {
 }
 watch(currentStep, (current, previous) => {
 
+    if (current === 3 && previous === 2){
+        window.axios.patch(route('pattern.update', props.pattern.uuid), {
+            pixels: chosenVariant.value
+        })
+    }
+
+    if (current === 2 && previous === 3){
+        alert('You\'ll lose all work if you change any values in the pattern specifications.')
+    }
+
     if (current === 2 && previous === 1) {
         cropImage()
         if (!props.pattern) {
@@ -322,7 +334,7 @@ watch(currentStep, (current, previous) => {
                     'content-type': 'multipart/form-data'
                 }
             }).then((res) => {
-                console.log('here')
+
                 if (res.data.pattern.uuid) {
                     router.visit(route('pattern.show', res.data.pattern.uuid))
                 }
@@ -386,6 +398,7 @@ const resetImage = () => {
 const canProceed = computed(() => {
     if (currentStep.value === 1) return uploadedImage.value !== null
     if (currentStep.value === 2) {
+
         return patternWidth.value > 0 && patternHeight.value > 0 && chosenVariant.value !== null
     }
     if (currentStep.value === 3) return selectedVariant.value !== null
